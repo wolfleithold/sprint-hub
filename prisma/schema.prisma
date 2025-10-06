@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sprint {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  weeks       Week[]
+}
+
+model Week {
+  id          String   @id @default(cuid())
+  weekNumber  Int
+  title       String
+  goals       String?  // JSON string of goals
+  sprint      Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  sprintId    String
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  days        Day[]
+
+  @@unique([sprintId, weekNumber])
+}
+
+model Day {
+  id          String   @id @default(cuid())
+  dayNumber   Int
+  date        DateTime
+  notes       String?
+  completed   Boolean  @default(false)
+  week        Week     @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  weekId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tasks       Task[]
+  resources   Resource[]
+
+  @@unique([weekId, dayNumber])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  day         Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId       String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  url         String?
+  type        String   // e.g., "article", "video", "documentation", "tutorial"
+  description String?
+  day         Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
