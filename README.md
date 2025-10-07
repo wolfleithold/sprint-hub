@@ -65,6 +65,9 @@ Sprint → Weeks → Days → Tasks
    ```
 
 4. **Initialize and seed the database**
+
+   Update the seed data to represent the correct date you begin your sprint!
+
    ```bash
    npm run db:push
    npm run db:seed
