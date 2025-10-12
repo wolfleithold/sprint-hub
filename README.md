@@ -18,7 +18,7 @@ A progress hub designed to improve skills and get interview ready in 2 months. B
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Database**: SQLite with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM
 - **Testing**: Vitest with Testing Library
 - **Theme**: next-themes for dark mode
 
@@ -47,39 +47,58 @@ Sprint → Weeks → Days → Tasks
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/wolfleithold/sprint-hub.git
    cd sprint-hub
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up the database**
-   
+
+   This application now uses PostgreSQL. You have several options:
+
+   **Option A: Neon (Recommended - Free)**
+
+   - Create account at [Neon](https://neon.tech/)
+   - Create a new project and copy the connection string
+
+   **Option B: Local PostgreSQL**
+
+   - Install PostgreSQL locally
+   - Create a database: `createdb sprint_hub_dev`
+
    Create a `.env` file in the root directory:
+
    ```bash
-   DATABASE_URL="file:./dev.db"
+   DATABASE_URL="postgresql://username:password@hostname:5432/database"
    ```
+
+   See `POSTGRESQL_MIGRATION.md` for detailed setup instructions.
 
 4. **Initialize and seed the database**
 
    Update the seed data to represent the correct date you begin your sprint!
 
    ```bash
+   npm run db:generate
    npm run db:push
    npm run db:seed
    ```
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
 
 6. **Open your browser**
-   
+
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Available Scripts
@@ -91,15 +110,20 @@ Sprint → Weeks → Days → Tasks
 - `npm test` - Run tests with Vitest
 - `npm run test:ui` - Run tests with Vitest UI
 - `npm run db:push` - Push database schema changes
+- `npm run db:migrate` - Create and apply migrations
+- `npm run db:generate` - Generate Prisma client
 - `npm run db:seed` - Seed the database with initial data
 - `npm run db:studio` - Open Prisma Studio to view/edit data
+- `npm run db:reset` - Reset database and re-run migrations
 
 ## API Routes
 
 ### GET /api/sprint
+
 Returns the sprint data with all weeks, days, tasks, and resources, including progress statistics.
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -117,9 +141,11 @@ Returns the sprint data with all weeks, days, tasks, and resources, including pr
 ```
 
 ### PATCH /api/task/[id]
+
 Update a task's completion status, title, or description.
 
 **Body:**
+
 ```json
 {
   "completed": boolean,
@@ -129,9 +155,11 @@ Update a task's completion status, title, or description.
 ```
 
 ### PATCH /api/day/[id]
+
 Update a day's notes or completion status.
 
 **Body:**
+
 ```json
 {
   "notes": "string",
@@ -155,6 +183,7 @@ npm test -- --watch
 ```
 
 Test files are located in the `__tests__` directory and cover:
+
 - Sprint API endpoint
 - Task update operations
 - Day update operations
@@ -194,12 +223,14 @@ This project was developed with the assistance of AI tools to accelerate develop
 1. **Architecture & Planning**: AI helped design the database schema and application architecture following Next.js 14 best practices with the App Router.
 
 2. **Code Generation**: AI assisted in generating:
+
    - Prisma schema with proper relationships and constraints
    - API routes following RESTful conventions
    - React components with TypeScript types
    - Comprehensive seed data for an 8-week interview prep plan
 
 3. **Best Practices**: AI ensured adherence to:
+
    - TypeScript strict typing
    - Next.js 14 App Router patterns
    - Server and Client Component separation
@@ -208,6 +239,7 @@ This project was developed with the assistance of AI tools to accelerate develop
    - Dark mode support with next-themes
 
 4. **Testing**: AI helped create comprehensive test coverage:
+
    - API endpoint tests
    - Database operation tests
    - Proper test setup and teardown
@@ -229,6 +261,7 @@ This project was developed with the assistance of AI tools to accelerate develop
 ### Learning Points
 
 This project demonstrates how AI can:
+
 - Accelerate development without sacrificing quality
 - Ensure consistent patterns and best practices
 - Generate comprehensive test coverage
@@ -238,6 +271,7 @@ This project demonstrates how AI can:
 ## Future Enhancements
 
 Potential features to add:
+
 - User authentication and multiple sprint support
 - Calendar integration
 - Progress charts and analytics
