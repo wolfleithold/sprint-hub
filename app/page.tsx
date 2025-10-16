@@ -1,30 +1,79 @@
 import Link from 'next/link';
 import { ProgressRing } from '@/components/ProgressRing';
 import { SprintWithStats } from '@/lib/types';
+import { prisma } from '@/lib/prisma';
 
 async function getSprintData(): Promise<SprintWithStats> {
   try {
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
+    console.log('Fetching sprint data directly from database');
     
-    console.log('Fetching from:', `${baseUrl}/api/sprint`);
-    
-    const res = await fetch(`${baseUrl}/api/sprint`, {
-      cache: 'no-store',
+    const sprint = await prisma.sprint.findFirst({
+      include: {
+        weeks: {
+          orderBy: { weekNumber: 'asc' },
+          include: {
+            days: {
+              orderBy: { dayNumber: 'asc' },
+              include: {
+                tasks: {
+                  orderBy: { order: 'asc' },
+                },
+                resources: true,
+              },
+            },
+          },
+        },
+      },
     });
-    
-    console.log('Response status:', res.status);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('API Error:', errorText);
-      throw new Error(`Failed to fetch sprint data: ${res.status} ${errorText}`);
+
+    if (!sprint) {
+      throw new Error('Sprint not found');
     }
-    
-    const data = await res.json();
-    console.log('Sprint data fetched successfully');
-    return data;
+
+    // Calculate progress statistics
+    const totalTasks = sprint.weeks.reduce(
+      (acc, week) =>
+        acc +
+        week.days.reduce((dayAcc, day) => dayAcc + day.tasks.length, 0),
+      0
+    );
+
+    const completedTasks = sprint.weeks.reduce(
+      (acc, week) =>
+        acc +
+        week.days.reduce(
+          (dayAcc, day) =>
+            dayAcc + day.tasks.filter((task) => task.completed).length,
+          0
+        ),
+      0
+    );
+
+    const totalDays = sprint.weeks.reduce(
+      (acc, week) => acc + week.days.length,
+      0
+    );
+
+    const completedDays = sprint.weeks.reduce(
+      (acc, week) =>
+        acc + week.days.filter((day) => day.completed).length,
+      0
+    );
+
+    const sprintWithStats: SprintWithStats = {
+      ...sprint,
+      stats: {
+        totalTasks,
+        completedTasks,
+        totalDays,
+        completedDays,
+        completionPercentage:
+          totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+      },
+    };
+
+    console.log('Sprint data fetched successfully from database');
+    return sprintWithStats;
   } catch (error) {
     console.error('getSprintData error:', error);
     throw error;
