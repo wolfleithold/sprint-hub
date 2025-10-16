@@ -3,8 +3,7 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { SprintWithStats } from '@/lib/types';
 
 async function getSprintData(): Promise<SprintWithStats> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/sprint`, {
+  const res = await fetch(`${process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000'}/api/sprint`, {
     cache: 'no-store',
   });
   
