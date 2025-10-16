@@ -3,15 +3,32 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { SprintWithStats } from '@/lib/types';
 
 async function getSprintData(): Promise<SprintWithStats> {
-  const res = await fetch(`${process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000'}/api/sprint`, {
-    cache: 'no-store',
-  });
-  
-  if (!res.ok) {
-    throw new Error('Failed to fetch sprint data');
+  try {
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000';
+    
+    console.log('Fetching from:', `${baseUrl}/api/sprint`);
+    
+    const res = await fetch(`${baseUrl}/api/sprint`, {
+      cache: 'no-store',
+    });
+    
+    console.log('Response status:', res.status);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('API Error:', errorText);
+      throw new Error(`Failed to fetch sprint data: ${res.status} ${errorText}`);
+    }
+    
+    const data = await res.json();
+    console.log('Sprint data fetched successfully');
+    return data;
+  } catch (error) {
+    console.error('getSprintData error:', error);
+    throw error;
   }
-  
-  return res.json();
 }
 
 export default async function Dashboard() {
