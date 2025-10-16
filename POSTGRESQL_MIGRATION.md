@@ -26,15 +26,82 @@ This application has been updated to use PostgreSQL instead of SQLite for produc
    - **macOS**: Use Homebrew: `brew install postgresql`
    - **Linux**: Use your package manager: `sudo apt-get install postgresql`
 
-2. Create a database:
+2. Start PostgreSQL service:
+   - **Windows**: It should start automatically, or use Services panel
+   - **macOS**: `brew services start postgresql`
+   - **Linux**: `sudo service postgresql start`
+
+3. Create a database using Command Prompt/Terminal:
+
+   **Windows - If psql command not found:**
+   ```bash
+   # Option 1: Navigate to PostgreSQL bin directory first
+   cd "C:\Program Files\PostgreSQL\15\bin"
+   # (Replace 15 with your PostgreSQL version number)
+   
+   # Then run psql
+   psql -U postgres
+   
+   # Option 2: Use full path to psql
+   "C:\Program Files\PostgreSQL\15\bin\psql" -U postgres
+   ```
+   
+   **macOS/Linux:**
+   ```bash
+   # Connect to PostgreSQL as superuser
+   psql -U postgres
+   ```
+   
+   **Once connected to psql:**
    ```sql
-   createdb sprint_hub_dev
+   # Create database
+   CREATE DATABASE sprint_hub_dev;
+   
+   # Create user (optional but recommended)
+   CREATE USER sprint_user WITH PASSWORD 'your_password';
+   GRANT ALL PRIVILEGES ON DATABASE sprint_hub_dev TO sprint_user;
+   
+   # Exit psql
+   \q
    ```
 
-3. Update your `.env` file:
+4. Update your `.env` file:
+   ```bash
+   # Using postgres superuser (simple)
+   DATABASE_URL="postgresql://postgres:your_postgres_password@localhost:5432/sprint_hub_dev"
+   
+   # Or using custom user (recommended)
+   DATABASE_URL="postgresql://sprint_user:your_password@localhost:5432/sprint_hub_dev"
    ```
-   DATABASE_URL="postgresql://username:password@localhost:5432/sprint_hub_dev"
-   ```
+
+## Connecting pgAdmin 4
+
+After setting up your local PostgreSQL:
+
+1. **Open pgAdmin 4** (it opens in your browser)
+
+2. **Add a new server:**
+   - Right-click "Servers" → "Register" → "Server"
+
+3. **General tab:**
+   - Name: `Sprint Hub Local` (or any name you prefer)
+
+4. **Connection tab:**
+   - Host: `localhost`
+   - Port: `5432`
+   - Maintenance database: `postgres`
+   - Username: `postgres` (or your custom user)
+   - Password: `your_postgres_password`
+   - Save password: ✅ (check this)
+
+5. **Click "Save"**
+
+6. **Navigate to your database:**
+   - Expand "Sprint Hub Local"
+   - Expand "Databases" 
+   - You should see `sprint_hub_dev`
+
+Now you can view your tables, run queries, and manage your database through pgAdmin's web interface!
 
 ## Migration Steps
 
@@ -83,6 +150,7 @@ This application has been updated to use PostgreSQL instead of SQLite for produc
 - Make sure your DATABASE_URL is correctly formatted
 - Check that your database service is running
 - Verify your credentials and database name
+- For pgAdmin: Check if PostgreSQL service is running on port 5432
 
 ### Migration Errors
 - If you get schema errors, try: `npm run db:reset`
@@ -93,6 +161,33 @@ This application has been updated to use PostgreSQL instead of SQLite for produc
   - **Windows**: Check Services or use `pg_ctl`
   - **macOS**: `brew services start postgresql`
   - **Linux**: `sudo service postgresql start`
+
+### pgAdmin Connection Issues
+- If pgAdmin can't connect, verify PostgreSQL is running
+- Check if port 5432 is available
+- Verify your postgres user password
+
+### Windows psql Command Not Found
+If you get "psql is not recognized" error:
+
+1. **Find your PostgreSQL installation:**
+   - Usually located at: `C:\Program Files\PostgreSQL\[version]\bin`
+   - Replace `[version]` with your installed version (like 15, 14, etc.)
+
+2. **Option 1 - Add to PATH (permanent):**
+   - Open System Properties → Environment Variables
+   - Edit the "Path" variable
+   - Add: `C:\Program Files\PostgreSQL\15\bin`
+   - Restart Command Prompt
+
+3. **Option 2 - Use full path (temporary):**
+   ```bash
+   "C:\Program Files\PostgreSQL\15\bin\psql" -U postgres
+   ```
+
+4. **Option 3 - Use SQL Shell (psql) from Start Menu:**
+   - Search for "SQL Shell (psql)" in Start Menu
+   - This opens psql directly
 
 ## Benefits of PostgreSQL
 
